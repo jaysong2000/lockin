@@ -68,22 +68,24 @@
 }
 
     function stopGame() {
-      if (stopped) return;
-      stopped = true;
-      clearInterval(timerInterval);
-      const elapsed = Math.floor((Date.now() - startTime)/1000);
-      msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
+  if (stopped) return;
+  stopped = true;
+  clearInterval(timerInterval);
+  const elapsed = Math.floor((Date.now() - startTime)/1000);
+  msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
 
-      let name = prompt('Enter your name:', 'skibidi');
-      if (!name) name = 'Anonymous';
-      const lb = loadLeaderboard();
-      lb.push({ name, time: elapsed });
-      saveLeaderboard(lb);
-      renderLeaderboard();
+  // Use local time as name
+  const now = new Date();
+  const name = now.toLocaleTimeString(); // e.g., "10:42:07 AM"
 
-      document.removeEventListener('keydown', stopGame);
-      document.removeEventListener('mousemove', stopGame);
-    }
+  const lb = loadLeaderboard();
+  lb.push({ name, time: elapsed });
+  saveLeaderboard(lb);
+  renderLeaderboard();
+
+  document.removeEventListener('keydown', stopGame);
+  document.removeEventListener('mousemove', stopGame);
+}
 
     document.addEventListener('keydown', function onFirstKey() {
       if (started) return;
