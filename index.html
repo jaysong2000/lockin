@@ -67,16 +67,18 @@
   lbDiv.style.display = 'block';
 }
 
-    function stopGame() {
+   function stopGame() {
   if (stopped) return;
   stopped = true;
   clearInterval(timerInterval);
   const elapsed = Math.floor((Date.now() - startTime)/1000);
   msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
 
-  // Use local time as name
+  // Generate name as "DD/MM/YYYY HH:MM:SS"
   const now = new Date();
-  const name = now.toLocaleTimeString(); // e.g., "10:42:07 AM"
+  const dateStr = now.toLocaleDateString('en-GB'); // "13/06/2025"
+  const timeStr = now.toLocaleTimeString();        // "10:42:07 AM"
+  const name = `${dateStr} ${timeStr}`;
 
   const lb = loadLeaderboard();
   lb.push({ name, time: elapsed });
