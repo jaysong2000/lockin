@@ -57,68 +57,52 @@
       localStorage.setItem('lockin_leaderboard', JSON.stringify(arr));
     }
     function renderLeaderboard() {
-      const lb = loadLeaderboard();
-      if (!lb.length) {
-        lbDiv.innerHTML = '';
-        return;
-      }
-      // sort descending by time
-      lb.sort((a,b) => b.time - a.time);
-      let html = '<div id="leaderboard"><h2>Leaderboard</h2><ol>';
+      const lb = loadLeaderboard().sort((a,b) => b.time - a.time);
+      let html = '<h2>Leaderboard</h2><ol>';
       lb.forEach(e => {
         html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
       });
-      html += '</ol></div>';
+      html += '</ol>';
       lbDiv.innerHTML = html;
     }
 
     // on first key: start timer
-    document.addEventListener('keydown', function onFirstKey(e) {
+    document.addEventListener('keydown', function onFirstKey() {
       if (started) return;
       started = true;
       startTime = Date.now();
       msg.style.animation = 'none';
-      // replace listener with one that stops on next key
       document.removeEventListener('keydown', onFirstKey);
       document.addEventListener('keydown', onStopKey);
 
-      // update every second
+      // update every 100ms so seconds increment promptly
       timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime)/1000);
         msg.textContent = `You have locked in for ${elapsed} second${elapsed===1?'':'s'}`;
       }, 100);
     });
 
-    // on second key: stop, record, prompt, update leaderboard
-    function onStopKey(e) {
+    // on second key: stop timer, record, show game‑over + leaderboard
+    function onStopKey() {
       clearInterval(timerInterval);
       const elapsed = Math.floor((Date.now() - startTime)/1000);
       msg.textContent = `You locked in for ${elapsed} second${elapsed===1?'':'s'}!`;
 
-      // prompt for name
-      let name = prompt('Enter your name for the leaderboard:','Anonymous');
+      // prompt for name and store
+      let name = prompt('Enter your name for the leaderboard:', 'Anonymous');
       if (!name) name = 'Anonymous';
-
-      // save
       const lb = loadLeaderboard();
       lb.push({ name, time: elapsed });
       saveLeaderboard(lb);
 
-      // render
+      // render leaderboard immediately
       renderLeaderboard();
 
-      // remove stopping listener
+      // clean up listener so extra keys don’t keep firing
       document.removeEventListener('keydown', onStopKey);
-
-      // offer reload
-      const restart = document.createElement('p');
-      restart.innerHTML = 'Press ⟳ to reload and play again.';
-      restart.style.marginTop = '1rem';
-      msg.after(restart);
-      document.addEventListener('keydown', () => location.reload());
     }
 
-    // initial render
+    // initial leaderboard (empty or from previous sessions)
     renderLeaderboard();
   </script>
 </body>
