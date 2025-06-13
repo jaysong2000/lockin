@@ -53,57 +53,65 @@
       const raw = localStorage.getItem('lockin_leaderboard');
       return raw ? JSON.parse(raw) : [];
     }
+
     function saveLeaderboard(arr) {
       localStorage.setItem('lockin_leaderboard', JSON.stringify(arr));
     }
+
     function renderLeaderboard() {
-  const lb = loadLeaderboard().sort((a,b) => b.time - a.time).slice(0, 5); // limit to top 5
-  let html = '<h2>longest grass touching sessions</h2><ol>';
-  lb.forEach(e => {
-    html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
-  });
-  html += '</ol>';
-  lbDiv.innerHTML = html;
-  lbDiv.style.display = 'block';
-}
+      const lb = loadLeaderboard().sort((a, b) => b.time - a.time).slice(0, 5); // limit to top 5
+      let html = '<h2>longest grass touching sessions</h2><ol>';
+      lb.forEach(e => {
+        html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
+      });
+      html += '</ol>';
+      lbDiv.innerHTML = html;
+      lbDiv.style.display = 'block';
+    }
 
-   function stopGame() {
-  if (stopped) return;
-  stopped = true;
-  clearInterval(timerInterval);
-  const elapsed = Math.floor((Date.now() - startTime)/1000);
-  msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
+    function stopGame() {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timerInterval);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      msg.textContent = `You touched grass for ${elapsed} second${elapsed === 1 ? '' : 's'}`;
 
-  // Generate name as "DD/MM/YYYY HH:MM:SS"
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-GB'); // "13/06/2025"
-  const timeStr = now.toLocaleTimeString();        // "10:42:07 AM"
-  const name = `${dateStr} ${timeStr}`;
+      // Generate name as "DD/MM/YYYY HH:MM:SS"
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-GB'); // "13/06/2025"
+      const timeStr = now.toLocaleTimeString();        // "10:42:07 AM"
+      const name = `${dateStr} ${timeStr}`;
 
-  const lb = loadLeaderboard();
-  lb.push({ name, time: elapsed });
-  saveLeaderboard(lb);
-  renderLeaderboard();
+      const lb = loadLeaderboard();
+      lb.push({ name, time: elapsed });
+      saveLeaderboard(lb);
+      renderLeaderboard();
 
-  document.removeEventListener('keydown', stopGame);
-  document.removeEventListener('mousemove', stopGame);
-}
+      document.removeEventListener('keydown', stopGame);
+      document.removeEventListener('mousemove', stopGame);
+    }
 
     document.addEventListener('keydown', function onFirstKey() {
       if (started) return;
       started = true;
+
+      // Request fullscreen
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn("Fullscreen request failed:", err);
+      });
+
       startTime = Date.now();
       msg.style.animation = 'none';
       document.removeEventListener('keydown', onFirstKey);
 
-      lbDiv.style.display = 'none'; // ensure it's hidden when game starts
+      lbDiv.style.display = 'none'; // hide leaderboard when game starts
 
       document.addEventListener('keydown', stopGame);
       document.addEventListener('mousemove', stopGame);
 
       timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime)/1000);
-        msg.textContent = `You have touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        msg.textContent = `You have touched grass for ${elapsed} second${elapsed === 1 ? '' : 's'}`;
       }, 100);
     });
 
