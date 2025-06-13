@@ -58,7 +58,7 @@
     }
     function renderLeaderboard() {
       const lb = loadLeaderboard().sort((a,b) => b.time - a.time);
-      let html = '<h2>Leaderboard</h2><ol>';
+      let html = '<h2>longest grass touching sessions</h2><ol>';
       lb.forEach(e => {
         html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
       });
