@@ -79,7 +79,7 @@
       stopped = true;
       clearInterval(timerInterval);
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      msg.textContent = `You touched grass for ${elapsed} second${elapsed === 1 ? '' : 's'}`;
+      msg.textContent = `Game over. You moved. You touched grass for ${elapsed} second${elapsed === 1 ? '' : 's'}`;
 
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-GB'); // "13/06/2025"
