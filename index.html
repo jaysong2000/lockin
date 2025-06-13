@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lock‑In Timer</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #888; /* gray background */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+      color: #fff;
+    }
+    #message {
+      font-size: 1rem;
+      text-align: center;
+      animation: flash 1s infinite alternate;
+      user-select: none;
+    }
+    @keyframes flash {
+      from { opacity: 1; }
+      to   { opacity: 0.3; }
+    }
+    #leaderboard {
+      margin-top: 2rem;
+      text-align: left;
+    }
+    #leaderboard h2 {
+      margin-bottom: 0.5rem;
+    }
+    #leaderboard ol {
+      padding-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="message">Press any key to begin.</div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <script>
+    let started = false, startTime = 0, timerInterval = null;
+    const msg = document.getElementById('message');
+    const lbDiv = document.getElementById('leaderboard');
+
+    // Load and render existing leaderboard from localStorage
+    function loadLeaderboard() {
+      const raw = localStorage.getItem('lockin_leaderboard');
+      return raw ? JSON.parse(raw) : [];
+    }
+    function saveLeaderboard(arr) {
+      localStorage.setItem('lockin_leaderboard', JSON.stringify(arr));
+    }
+    function renderLeaderboard() {
+      const lb = loadLeaderboard();
+      if (!lb.length) {
+        lbDiv.innerHTML = '';
+        return;
+      }
+      // sort descending by time
+      lb.sort((a,b) => b.time - a.time);
+      let html = '<div id="leaderboard"><h2>Leaderboard</h2><ol>';
+      lb.forEach(e => {
+        html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
+      });
+      html += '</ol></div>';
+      lbDiv.innerHTML = html;
+    }
+
+    // on first key: start timer
+    document.addEventListener('keydown', function onFirstKey(e) {
+      if (started) return;
+      started = true;
+      startTime = Date.now();
+      msg.style.animation = 'none';
+      // replace listener with one that stops on next key
+      document.removeEventListener('keydown', onFirstKey);
+      document.addEventListener('keydown', onStopKey);
+
+      // update every second
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime)/1000);
+        msg.textContent = `You have locked in for ${elapsed} second${elapsed===1?'':'s'}`;
+      }, 100);
+    });
+
+    // on second key: stop, record, prompt, update leaderboard
+    function onStopKey(e) {
+      clearInterval(timerInterval);
+      const elapsed = Math.floor((Date.now() - startTime)/1000);
+      msg.textContent = `You locked in for ${elapsed} second${elapsed===1?'':'s'}!`;
+
+      // prompt for name
+      let name = prompt('Enter your name for the leaderboard:','Anonymous');
+      if (!name) name = 'Anonymous';
+
+      // save
+      const lb = loadLeaderboard();
+      lb.push({ name, time: elapsed });
+      saveLeaderboard(lb);
+
+      // render
+      renderLeaderboard();
+
+      // remove stopping listener
+      document.removeEventListener('keydown', onStopKey);
+
+      // offer reload
+      const restart = document.createElement('p');
+      restart.innerHTML = 'Press ⟳ to reload and play again.';
+      restart.style.marginTop = '1rem';
+      msg.after(restart);
+      document.addEventListener('keydown', () => location.reload());
+    }
+
+    // initial render
+    renderLeaderboard();
+  </script>
+</body>
+</html>
