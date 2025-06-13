@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>lock in</title>
+  <title>touch grass kids</title>
   <style>
     html, body {
       height: 100%;
@@ -78,7 +78,7 @@
       // update every 100ms so seconds increment promptly
       timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime)/1000);
-        msg.textContent = `You have locked in for ${elapsed} second${elapsed===1?'':'s'}`;
+        msg.textContent = `You have touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
       }, 100);
     });
 
@@ -86,10 +86,10 @@
     function onStopKey() {
       clearInterval(timerInterval);
       const elapsed = Math.floor((Date.now() - startTime)/1000);
-      msg.textContent = `You locked in for ${elapsed} second${elapsed===1?'':'s'}!`;
+      msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
 
       // prompt for name and store
-      let name = prompt('Enter your name for the leaderboard:', 'Anonymous');
+      let name = prompt('Enter your name:', 'skibidi');
       if (!name) name = 'Anonymous';
       const lb = loadLeaderboard();
       lb.push({ name, time: elapsed });
