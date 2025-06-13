@@ -28,6 +28,7 @@
     #leaderboard {
       margin-top: 2rem;
       text-align: left;
+      display: none; /* hide initially */
     }
     #leaderboard h2 {
       margin-bottom: 0.5rem;
@@ -44,11 +45,10 @@
   </div>
 
   <script>
-    let started = false, startTime = 0, timerInterval = null;
+    let started = false, startTime = 0, timerInterval = null, stopped = false;
     const msg = document.getElementById('message');
     const lbDiv = document.getElementById('leaderboard');
 
-    // Load and render existing leaderboard from localStorage
     function loadLeaderboard() {
       const raw = localStorage.getItem('lockin_leaderboard');
       return raw ? JSON.parse(raw) : [];
@@ -64,46 +64,46 @@
       });
       html += '</ol>';
       lbDiv.innerHTML = html;
+      lbDiv.style.display = 'block'; // show when rendering
     }
 
-    // on first key: start timer
+    function stopGame() {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timerInterval);
+      const elapsed = Math.floor((Date.now() - startTime)/1000);
+      msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
+
+      let name = prompt('Enter your name:', 'skibidi');
+      if (!name) name = 'Anonymous';
+      const lb = loadLeaderboard();
+      lb.push({ name, time: elapsed });
+      saveLeaderboard(lb);
+      renderLeaderboard();
+
+      document.removeEventListener('keydown', stopGame);
+      document.removeEventListener('mousemove', stopGame);
+    }
+
     document.addEventListener('keydown', function onFirstKey() {
       if (started) return;
       started = true;
       startTime = Date.now();
       msg.style.animation = 'none';
       document.removeEventListener('keydown', onFirstKey);
-      document.addEventListener('keydown', onStopKey);
 
-      // update every 100ms so seconds increment promptly
+      lbDiv.style.display = 'none'; // ensure it's hidden when game starts
+
+      document.addEventListener('keydown', stopGame);
+      document.addEventListener('mousemove', stopGame);
+
       timerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime)/1000);
         msg.textContent = `You have touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
       }, 100);
     });
 
-    // on second key: stop timer, record, show game‑over + leaderboard
-    function onStopKey() {
-      clearInterval(timerInterval);
-      const elapsed = Math.floor((Date.now() - startTime)/1000);
-      msg.textContent = `You touched grass for ${elapsed} second${elapsed===1?'':'s'}`;
-
-      // prompt for name and store
-      let name = prompt('Enter your name:', 'skibidi');
-      if (!name) name = 'Anonymous';
-      const lb = loadLeaderboard();
-      lb.push({ name, time: elapsed });
-      saveLeaderboard(lb);
-
-      // render leaderboard immediately
-      renderLeaderboard();
-
-      // clean up listener so extra keys don’t keep firing
-      document.removeEventListener('keydown', onStopKey);
-    }
-
-    // initial leaderboard (empty or from previous sessions)
-    renderLeaderboard();
+    lbDiv.style.display = 'none'; // hide on page load
   </script>
 </body>
 </html>
