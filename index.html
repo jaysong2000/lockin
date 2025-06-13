@@ -57,15 +57,15 @@
       localStorage.setItem('lockin_leaderboard', JSON.stringify(arr));
     }
     function renderLeaderboard() {
-      const lb = loadLeaderboard().sort((a,b) => b.time - a.time);
-      let html = '<h2>longest grass touching sessions</h2><ol>';
-      lb.forEach(e => {
-        html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
-      });
-      html += '</ol>';
-      lbDiv.innerHTML = html;
-      lbDiv.style.display = 'block'; // show when rendering
-    }
+  const lb = loadLeaderboard().sort((a,b) => b.time - a.time).slice(0, 5); // limit to top 5
+  let html = '<h2>longest grass touching sessions</h2><ol>';
+  lb.forEach(e => {
+    html += `<li><strong>${e.name}</strong>: ${e.time} s</li>`;
+  });
+  html += '</ol>';
+  lbDiv.innerHTML = html;
+  lbDiv.style.display = 'block';
+}
 
     function stopGame() {
       if (stopped) return;
